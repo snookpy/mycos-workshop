@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snookpy 888</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            background-color: #222;
+        }
+
+        .slot-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .slot {
+            width: 60px;
+            height: 80px;
+            font-size: 2rem;
+            text-align: center;
+            line-height: 80px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease-in-out, background-color 0.1s ease;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        footer,
+        label,
+        legend {
+            margin-top: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        h1 {
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="" onsubmit="onSubmitMoney(event)" id="form-input">
+        <div>
+            <label for="money">Insert money</label>
+            <input type="number" min="1" max="90000" name="money" id="money">
+        </div>
+
+        <fieldset>
+            <legend>Choose a bet</legend>
+
+            <div>
+                <input type="radio" id="low" name="choice" value="low" required>
+                <label for="low">Low</label>
+            </div>
+
+            <div>
+                <input type="radio" id="mid" name="choice" value="mid" required>
+                <label for="mid">Mid</label>
+            </div>
+
+            <div>
+                <input type="radio" id="high" name="choice" value="high" required>
+                <label for="high">High</label>
+            </div>
+        </fieldset>
+        <button type="submit">submit</button>
+    </form>
+
+    <section class="hidden" id="main-game">
+        <aside class="slot-container">
+            <div class="slot" role="status">1</div>
+            <div class="slot" role="status">1</div>
+            <div class="slot" role="status">1</div>
+        </aside>
+        <button onclick="spinSlots()" id="spin-button">Spin</button>
+    </section>
+
+    <section id="game-result" class="hidden">
+        <h1 id="game-result-text"></h1>
+        <button onclick="tryAgain()">try again</button>
+    </section>
+
+
+    <footer>
+        Snookpy 888 game
+    </footer>
+
+    <script>
+        let GMoney = 0;
+        let GBet = '';
+
+        function hideClass(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.add('hidden');
+        }
+
+        function showClass(elementId) {
+            const element = document.getElementById(elementId);
+            element.classList.remove('hidden');
+        }
+
+        function onSubmitMoney(e) {
+            e.preventDefault();
+            GMoney = Number(document.getElementById("money").value);
+            const selectedOption = document.querySelector('input[name="choice"]:checked');
+            GBet = selectedOption.value;
+            hideClass('form-input')
+            showClass('main-game')
+            showClass('spin-button')
+        }
+
+        function tryAgain() {
+            showClass('form-input')
+            hideClass('main-game')
+            hideClass('game-result')
+        }
+
+        function spinSlots() {
+            hideClass('spin-button')
+            let slots = document.querySelectorAll('.slot');
+            let spinTime = 1000;
+            let totalSum = 0;
+
+            slots.forEach((slot, index) => {
+                let spinInterval = setInterval(() => {
+                    // Apply transform for smooth animation effect
+                    slot.style.transform = "rotateX(90deg)"; // Rotate effect
+
+                    setTimeout(() => {
+                        // Random number between 1 and 6
+                        slot.textContent = Math.floor(Math.random() * 6) + 1;
+                        slot.style.transform = "rotateX(0deg)";
+                    }, 200);
+                }, 100); // Change number every 100ms
+
+                // Stop spinning after spinTime + index * 200ms
+                setTimeout(() => {
+                    clearInterval(spinInterval);
+                    slot.textContent = Math.floor(Math.random() * 6) + 1; // Final random number
+                    slot.style.transform = "scale(1.1)"; // Slight scaling for effect
+                    setTimeout(() => {
+                        slot.style.transform = "scale(1)";
+                        totalSum += parseInt(slot.textContent);
+
+                        // Update the total after all slots have finished spinning
+                        if (index === slots.length - 1) {
+                            showResult(totalSum)
+                        }
+                    }, 200);
+
+                }, spinTime + index * 200); // Stagger the timing for each slot
+            });
+        }
+
+        function showResult(total) {
+            showClass('game-result')
+
+            const resultText = document.getElementById('game-result-text');
+
+            let comText = 'Result is ' + total + ' and you bet ' + GBet + ' ';
+            if (GBet === 'mid' && 11 === total) {
+                comText += "your got " + (GMoney * 5)
+            } else if (GBet === 'low' && total <= 10) {
+                comText += "your got " + (GMoney * 2)
+            } else if (GBet === 'high' && total >= 12) {
+                comText += "your got " + (GMoney * 2)
+            } else {
+                comText += "you lose your money " + GMoney
+            }
+
+            resultText.textContent = comText;
+        }
+    </script>
+</body>
+
+</html>
